@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#24172b">
+<title>رحلة نبأ — مغامرة الغابة</title>
+<style>
+:root{--pink:#f4a0c0;--hot:#ed5e98;--cream:#fff1d3;--ink:#251d2a;--glass:rgba(31,23,36,.82)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;overflow:hidden;background:#171623;color:white;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;touch-action:none}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;outline:none}button{font:inherit;color:inherit;cursor:pointer;border:0}#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#24172b;z-index:50;text-align:center;padding:24px}#loading .flower{font-size:44px;animation:pulse 1.5s infinite}#loadtext{color:#f2dce9;font-size:14px}@keyframes pulse{50%{transform:scale(1.12);opacity:.7}}
+#startScreen,#endingScreen{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(180deg,rgba(16,16,35,.35),rgba(20,12,30,.89));text-align:center} .startCard{width:min(100%,480px);border:1px solid rgba(255,219,240,.35);border-radius:28px;padding:26px 22px;background:linear-gradient(155deg,rgba(67,42,65,.9),rgba(25,23,40,.88));box-shadow:0 22px 80px #0008;backdrop-filter:blur(10px)}.moon{font-size:48px;filter:drop-shadow(0 0 14px #f4a0c0)}h1{font-family:Georgia,serif;font-weight:600;letter-spacing:-1px;font-size:clamp(34px,8vw,54px);line-height:1.03;margin:12px 0;color:#fff3df} .subtitle{color:#ead0e0;font-size:15px;line-height:1.55;margin:12px 0 20px}.pills{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:18px 0 22px}.pill{border:1px solid #ffffff24;background:#fff1;border-radius:100px;padding:8px 11px;font-size:12px;color:#ffe3f0}.mainButton{width:100%;padding:16px 18px;border-radius:16px;background:linear-gradient(100deg,#e92c79,#ff9e38);font-weight:800;font-size:17px;box-shadow:0 8px 24px #e52b7940}.smallhint{font-size:12px;color:#cdbcca;margin-top:14px;line-height:1.5}
+#hud{position:fixed;inset:0;z-index:5;pointer-events:none;display:none}#topbar{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.hudPanel{background:rgba(31,24,37,.82);border:1px solid rgba(255,221,238,.22);box-shadow:0 5px 20px #0002;backdrop-filter:blur(8px);border-radius:15px;padding:11px 13px;color:#fff7f0}.questBox{width:min(68vw,305px);max-width:305px}.questTitle{font-size:11px;color:#ffbed8;letter-spacing:1.4px;text-transform:uppercase;font-weight:800}.questHeading{font-weight:800;font-size:16px;color:#fff0cf;margin:4px 0}.questText{font-size:12px;line-height:1.45;color:#e5d7e0}.progress{height:4px;background:#ffffff20;border-radius:5px;margin-top:8px;overflow:hidden}.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f27eb1,#ffd28c);transition:width .3s}.counter{font-size:12px;white-space:nowrap;display:flex;gap:6px;align-items:center;padding:10px 12px}
+#missionButton{pointer-events:auto;display:block;border:1px solid #fff3;background:#342438;color:#fff;border-radius:12px;padding:8px 11px;font-size:12px}#targetText{position:absolute;top:calc(env(safe-area-inset-top,0px) + 115px);left:50%;transform:translateX(-50%);font-size:12px;color:#fff1d8;background:#201728a8;border-radius:20px;padding:7px 12px;white-space:nowrap;opacity:0;transition:opacity .15s}#targetText.show{opacity:1}#interactHint{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);transform:translateX(-50%);border-radius:25px;background:#2b2038e8;border:1px solid #ffcee4a8;padding:10px 15px;font-size:13px;font-weight:700;white-space:nowrap;opacity:0;transition:opacity .15s}#interactHint.show{opacity:1}
+#controls{position:absolute;inset:0;pointer-events:none}#stickBase{pointer-events:auto;position:absolute;left:max(22px,env(safe-area-inset-left));bottom:calc(env(safe-area-inset-bottom,0px) + 24px);width:132px;height:132px;border-radius:50%;border:2px solid #f4b2ce77;background:rgba(30,25,37,.55);box-shadow:inset 0 0 20px #0003;touch-action:none}#stick{position:absolute;width:58px;height:58px;left:35px;top:35px;border-radius:50%;border:2px solid #ffd8e8;background:linear-gradient(145deg,#f34b91,#c92d76);box-shadow:0 3px 13px #0005;transform:translate(0,0)}.actionStack{position:absolute;right:max(18px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom,0px) + 22px);display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:auto}.actionBtn{width:58px;height:58px;border-radius:50%;background:rgba(35,28,44,.83);border:2px solid #ffffff99;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 15px #0004;touch-action:none}.actionBtn.primary{background:linear-gradient(145deg,#f14c91,#d92772);border-color:#ffd1e5;font-size:16px;font-weight:900}.actionBtn .sub{font-size:9px;position:absolute;transform:translateY(35px);letter-spacing:.2px;color:#fff1f7;text-shadow:0 2px 5px #000}.roundTopBtn{pointer-events:auto;position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 78px);border:1px solid #fff3;background:#261c30e8;border-radius:12px;padding:8px 11px;font-size:12px}#toast{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:min(88vw,360px);padding:15px 17px;border-radius:17px;background:rgba(31,23,38,.94);border:1px solid #ffc1dc88;box-shadow:0 12px 40px #0005;text-align:center;font-size:14px;line-height:1.5;opacity:0;pointer-events:none;transition:opacity .18s}#toast.show{opacity:1}#toast b{color:#ffd9a1;display:block;margin-bottom:3px;font-size:15px}#puzzleModal{position:fixed;z-index:30;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:#100b20b8;backdrop-filter:blur(8px)}.puzzleCard{width:min(100%,400px);border-radius:23px;background:linear-gradient(145deg,#413049,#1f1c2b);padding:23px;border:1px solid #f2c4df66;text-align:center;box-shadow:0 20px 70px #0008}.puzzleCard h2{font-family:Georgia,serif;color:#ffe6c4;margin:6px 0 8px}.puzzleCard p{font-size:13px;color:#e6cfdf;line-height:1.5}.tiles{display:flex;justify-content:center;gap:9px;margin:18px 0;flex-wrap:wrap}.tile{min-width:75px;padding:13px 10px;border-radius:13px;background:#fff1;border:1px solid #fff3;font-size:27px}.tile span{display:block;font-size:10px;color:#f4d8e8;margin-top:5px}.sequence{min-height:42px;border-radius:12px;background:#170f20a8;padding:10px;letter-spacing:6px;font-size:22px;color:#ffe5a9}.secondaryButton{background:#ffffff14;border:1px solid #ffffff2a;border-radius:12px;padding:11px 16px;margin-top:12px;font-size:13px}#endingScreen{display:none}#endingScreen .startCard{max-width:460px}#endingLetter{white-space:pre-line;background:#fff7eb;color:#604255;border-radius:12px;padding:18px;text-align:left;line-height:1.65;font-family:Georgia,serif;margin:18px 0;font-size:15px}.hidden{display:none!important}
+@media(min-width:760px){.questBox{width:310px}#stickBase{width:145px;height:145px}#stick{left:39px;top:39px}#targetText{top:100px}}
+
+/* V2: stronger contrast, brighter colors, clearer mobile guidance */
+:root{--pink:#ff4fa0;--hot:#ff267f;--cream:#fff0b8;--ink:#171126;--glass:rgba(19,14,32,.94)}
+#startScreen{background:radial-gradient(ellipse at 50% 20%,rgba(255,73,167,.24),transparent 55%),linear-gradient(180deg,rgba(10,30,58,.16),rgba(11,10,29,.92))}
+.startCard{border:2px solid rgba(255,190,226,.75);background:linear-gradient(150deg,rgba(76,27,80,.96),rgba(15,25,53,.97));box-shadow:0 22px 80px #09051f99,0 0 35px #ff3b9b2b}
+h1{color:#fff7c8;text-shadow:0 3px 0 #9c246c,0 0 25px #ff4da8a6}
+.subtitle{color:#fff0fa}.pill{background:#ff4b9d25;border:1px solid #ffb4db99;color:#fff7fd;font-weight:700}
+.mainButton{background:linear-gradient(100deg,#ff1684,#ff7a28);box-shadow:0 8px 28px #ff16845e, inset 0 1px #ffffff70}
+.smallhint{color:#fff0fb;font-size:13px;line-height:1.7;background:#090c20a8;border:1px solid #ffffff24;border-radius:14px;padding:12px;margin-top:14px}
+.hudPanel{background:rgba(12,16,38,.94);border:1px solid rgba(255,219,244,.65);box-shadow:0 6px 22px #06091b80}
+.questTitle{color:#ff86c4}.questHeading{color:#fff0a8;font-size:17px}.questText{color:#fff4fc}.progress{height:7px;background:#ffffff32}.progress>i{background:linear-gradient(90deg,#ff1684,#ffdf49)}
+#targetText,#interactHint{background:#10152df5;border:2px solid #ff8fc9;color:#fff9d9;font-weight:800;box-shadow:0 5px 20px #0007}
+#stickBase{background:rgba(12,20,42,.78);border:3px solid #ffffffa8;box-shadow:inset 0 0 22px #0006,0 0 18px #ff4f9b44}
+#stick{background:linear-gradient(145deg,#ff5bac,#f01883);border:3px solid #ffe7f4;box-shadow:0 3px 16px #0008}
+.actionBtn{background:rgba(12,20,42,.94);border:2px solid #fff;box-shadow:0 5px 18px #0008}.actionBtn.primary{background:linear-gradient(145deg,#ff4fa0,#ff197c);border:2px solid #ffe2f1}
+.counter{background:#111a36f5;font-size:14px;color:#fff5a8}
+.puzzleCard{background:linear-gradient(145deg,#502454,#101c3d);border:2px solid #ff9bcf}.puzzleCard p{color:#fff2fa}.tile{background:#ff7bb51c;border:1px solid #ffc1e5;color:#fff}
+@media(max-height:700px){.startCard{padding:18px 16px}.moon{font-size:34px}h1{font-size:36px}.subtitle{margin:8px 0 12px}.pills{margin:12px 0}.smallhint{font-size:12px;padding:9px}}
+
+
+/* Forest Edition: richer natural colors, clearer play HUD, cinematic atmosphere */
+:root{--pink:#f28eb8;--hot:#e85b8f;--cream:#f7e8c5;--ink:#14241d;--glass:rgba(17,32,29,.92)}
+body{background:#10251d}
+.startCard{background:linear-gradient(145deg,rgba(35,65,48,.97),rgba(22,37,45,.97));border-color:#e4c995;box-shadow:0 25px 90px #07130fc9,0 0 32px #72b87b24}
+h1{color:#fff0d0;text-shadow:0 2px 0 #4d3a28,0 0 24px #e6b77b45}
+.subtitle{color:#e8e8d8}.pill{background:#7fa66a22;border-color:#c8d9a766;color:#f4f2df}
+.mainButton{background:linear-gradient(100deg,#477d52,#c18b4e);box-shadow:0 8px 24px #07130f66}
+.smallhint{color:#f1f0df;background:#101f1ad9;border-color:#a9c99c55}
+.hudPanel{background:rgba(17,35,29,.94);border-color:#d7c89b77}.questTitle{color:#b8d99b}.questHeading{color:#f6e8c8}.questText{color:#e4e8d9}
+.progress>i{background:linear-gradient(90deg,#6fbd72,#f0c76e)}
+#targetText,#interactHint{background:#132c24f5;border-color:#d5c18b;color:#fff0cf}
+#stickBase{border-color:#e7e4c9a8;background:rgba(17,41,32,.78)}#stick{background:linear-gradient(145deg,#78b96e,#386e54);border-color:#e3e9c9}
+.actionBtn{background:rgba(17,41,32,.94);border-color:#e8e4cc}.actionBtn.primary{background:linear-gradient(145deg,#6fb66b,#3d8057);border-color:#d9ebbf}
+.counter{background:#17352bf5;color:#f8e5a9}.puzzleCard{background:linear-gradient(145deg,#365f43,#172d34);border-color:#c8d6a0}.puzzleCard h2{color:#f6e8c8}.puzzleCard p{color:#e8eadc}.tile{background:#e3d7b71a;border-color:#c9d5a066}
+#navHelp{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 164px);transform:translateX(-50%);max-width:88vw;padding:8px 12px;border-radius:12px;background:#102b20ed;border:2px solid #e5ce8e;color:#fff8df;font-weight:800;font-size:12px;text-align:center;box-shadow:0 4px 18px #0008;pointer-events:none;display:none}#soundButton{position:absolute;right:12px;top:calc(env(safe-area-inset-top,0px) + 126px);z-index:8;pointer-events:auto;border:1px solid #d5c18b88;border-radius:12px;background:#132c24f5;padding:9px 12px;font-size:12px;font-weight:800;color:#fff0cf}
+@media(max-width:760px){#soundButton{top:calc(env(safe-area-inset-top,0px) + 128px)}}
+
+/* Night-forest contrast pass: saturated jewel greens, strong sakura pinks, no washed-out whites */
+:root{--pink:#ff3e91;--hot:#ff176b;--cream:#ffd66b;--ink:#061b13;--glass:rgba(5,20,14,.97)}
+html,body{background:#071d14;color:#fff8d9}
+#loading{background:#071d14;color:#ffd66b}#loadtext{color:#b9e7a2}
+#startScreen,#endingScreen{background:radial-gradient(ellipse at 50% 22%,rgba(255,47,124,.14),transparent 50%),linear-gradient(180deg,rgba(3,33,22,.24),rgba(3,13,9,.96))}
+.startCard{background:linear-gradient(145deg,rgba(13,57,34,.99),rgba(7,28,22,.99));border:2px solid #d9ad35;box-shadow:0 24px 90px #000c,0 0 30px #ffb31f22}
+h1{color:#ffdc66;text-shadow:0 2px 0 #5e2d08,0 0 18px #ffad1a44}
+.subtitle{color:#e5f6cc}.pill{background:#ffca2422;border:1px solid #e0b948;color:#fff1a8}
+.mainButton{background:linear-gradient(100deg,#da164d,#ff8b16);box-shadow:0 8px 28px #ff561f4d,inset 0 1px #ffffff50;color:#fffce9}
+.smallhint{color:#e4f5cf;background:#061b13;border-color:#8dbb43}
+.hudPanel{background:rgba(4,29,20,.97);border:2px solid #bd8f25;box-shadow:0 7px 22px #0009}
+.questTitle{color:#8ff081}.questHeading{color:#ffdb60}.questText{color:#e6f8d6}.progress{background:#020c08;border:1px solid #50713d}.progress>i{background:linear-gradient(90deg,#4cff68,#ffbf23)}
+#targetText,#interactHint{background:#05251a;border:2px solid #ffb81e;color:#fff2b0;box-shadow:0 0 18px #ffb30055,0 6px 18px #0009}
+#navHelp{background:#05251af7;border:2px solid #ffbe20;color:#fff2b0;box-shadow:0 0 22px #ffc52c77,0 4px 18px #0009}
+#soundButton,#missionButton{background:#06261b;border:2px solid #c89d29;color:#ffdf65}
+#stickBase{background:rgba(3,21,14,.92);border:3px solid #e5b52f;box-shadow:inset 0 0 22px #000c,0 0 20px #e5a91c33}
+#stick{background:linear-gradient(145deg,#83e044,#177c39);border:3px solid #e9ffc2;box-shadow:0 0 17px #5cff6755}
+.actionBtn{background:#06281c;border:2px solid #ffce45;box-shadow:0 5px 18px #000b;color:#fff0a0}.actionBtn.primary{background:linear-gradient(145deg,#ff3d61,#d10a37);border-color:#ffdc59;box-shadow:0 0 20px #ff263f55}
+.counter{background:#05291c;border:2px solid #ffbd24;color:#ffe15f}.puzzleCard{background:linear-gradient(145deg,#164a2b,#061c18);border:2px solid #ffc42a;box-shadow:0 0 30px #ffb21d33}.puzzleCard h2{color:#ffdf65}.puzzleCard p{color:#e6f5cf}.tile{background:#16432b;border:1px solid #a9dd50;color:#fff3bd}.sequence{background:#03140e;color:#ffdb59;border:1px solid #b78c23}
+#toast{background:rgba(3,25,17,.98);border:2px solid #ffbf24;box-shadow:0 0 22px #ffba2244,0 12px 40px #000b}#toast b{color:#ffda56}
+#missionsModal>div{background:linear-gradient(145deg,#0c4329,#041810)!important;border-color:#dbac23!important}#missionsModal h2{color:#ffdc59!important}#missionsModal p{color:#d9efbf!important}
+#endingLetter{background:#102d1d;color:#ffedb2;border:1px solid #b88f26}
+
+
+/* Mobile HUD repair: separate quest panel from sound/mission tools and prevent text overlap */
+#topbar{gap:9px}
+.questBox{width:min(68vw,325px);max-width:325px}
+#missionButton{z-index:9}
+#soundButton{z-index:9}
+#toast{z-index:12;max-height:24vh;overflow:auto}
+@media(max-width:760px){
+  #topbar{top:calc(env(safe-area-inset-top,0px) + 7px);left:8px;right:8px;gap:6px}
+  .questBox{width:min(68vw,325px);max-width:325px;padding:9px 11px;border-radius:14px}
+  .questTitle{font-size:10px;letter-spacing:.7px}
+  .questHeading{font-size:14px;line-height:1.25;margin:3px 0}
+  .questText{font-size:11px;line-height:1.34}
+  .progress{margin-top:6px;height:5px}
+  .counter{min-width:54px;min-height:50px;padding:6px 7px;flex-direction:column;justify-content:center;gap:2px;font-size:12px}
+  #missionButton{left:8px;right:auto;top:calc(env(safe-area-inset-top,0px) + 68px);padding:6px 9px;font-size:11px;border-radius:10px}
+  #soundButton{left:8px;right:auto;top:calc(env(safe-area-inset-top,0px) + 110px);padding:6px 9px;font-size:10px;border-radius:10px}
+  #navHelp{top:calc(env(safe-area-inset-top,0px) + 195px);max-width:78vw;padding:7px 10px;font-size:11px}
+  #targetText{display:none!important}
+  #interactHint{bottom:calc(env(safe-area-inset-bottom,0px) + 215px);max-width:82vw;white-space:normal;text-align:center;font-size:12px;padding:8px 11px}
+  .actionStack{gap:10px;right:max(12px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}
+  .actionBtn{width:54px;height:54px}
+}
+
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="loading"><div class="flower">🌸</div><strong>رحلة نبأ</strong><div id="loadtext">جارٍ إيقاظ غابة الساكورا…</div></div>
+<section id="startScreen" class="hidden"><div class="startCard"><div class="moon">🌸</div><div style="letter-spacing:2px;font-size:11px;color:#f5b7d2;font-weight:800">عالم صغير صُمّم خصيصاً إلك</div><h1>رحلة<br>نبأ</h1><p class="subtitle">مهمتك الأساسية العثور على سنفور الضائع وإرجاعه إلى بيته عبر عشر مهمات. وبعد عودته للجدة نون، تنتظرك مهمة سرية إضافية: اجمعي ثلاثة مفاتيح ذهبية وافتحي البوابة المضيئة لإنهاء الرحلة.</p><div class="pills"><span class="pill">🐈 ١٠ مهمات ممتعة</span><span class="pill">🦋 اجمعي السحر</span><span class="pill">🦌 غزلان في الغابة</span><span class="pill">🌼 أزهار برية</span><span class="pill">🚶 أهل القرية يتجولون</span><span class="pill">🔐 حلّي لغز المعبد</span></div><button id="begin" class="mainButton">▶ ابدئي المغامرة</button><div class="smallhint"><b>طريقة اللعب</b><br>🕹️ الدائرة اليسرى = حركة &nbsp; • &nbsp; ↥ قفز<br>✦ تفاعل = تحدثي، افحصي الأدلة، واحملي سنفور<br>🎯 اتبعي لوحة المهمة أعلى الشاشة. اقتربي من الشخصية أو الشيء المضيء ثم اضغطي «تفاعل».</div></div></section>
+<div id="hud">
+  <div id="topbar"><div class="hudPanel questBox"><div class="questTitle">✦ المهمة الحالية</div><div id="qTitle" class="questHeading">القطة الضائعة</div><div id="qDesc" class="questText">تحدثي مع الجدة نون في القرية.</div><div class="progress"><i id="progressBar"></i></div><div id="qStep" class="questText" style="margin-top:6px;color:#f0bfd7">الخطوة ١ من ٥</div></div><div class="hudPanel counter"><span id="counterIcon">🐟</span><b id="petalCount">0/3</b></div></div>
+  <div id="targetText"></div><div id="navHelp">اتبعي العلامة الذهبية</div><div id="interactHint">✦ اضغطي تفاعل بالقرب من الهدف</div><button id="soundButton">♫ الصوت: يعمل</button><button id="missionButton" class="roundTopBtn">☰ المهام</button>
+  <div id="controls"><div id="stickBase"><div id="stick"></div></div><div class="actionStack"><button id="interactBtn" class="actionBtn primary">✦<span class="sub">تفاعل</span></button><button id="jumpBtn" class="actionBtn">↥<span class="sub">قفز</span></button><button id="runBtn" class="actionBtn">➤<span class="sub">ركض</span></button></div></div>
+  <div id="toast"><b></b><span></span></div>
+</div>
+<div id="missionsModal" style="position:fixed;z-index:31;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:#07150fd9;backdrop-filter:blur(7px)"><div style="width:min(100%,420px);max-height:80vh;overflow:auto;border-radius:22px;background:linear-gradient(145deg,#173d2d,#10251e);border:2px solid #d9c68b;padding:20px;color:#fff7df"><h2 style="margin:0 0 8px;color:#ffe9ad">📜 مهمات نبأ العشر</h2><p style="font-size:12px;color:#dbe7d4">هدفك الأساسي العثور على سنفور وإعادته إلى بيته عبر ١٠ مهمات. بعدها افتحي البوابة السرية بمساعدة ٣ مفاتيح إضافية.</p><div id="missionList" style="display:grid;gap:8px"></div><button id="closeMissions" class="secondaryButton">رجوع للعبة</button></div></div>
+<div id="puzzleModal"><div class="puzzleCard"><div style="font-size:34px">⛩️</div><h2>لغز الأنوار لطريق العودة</h2><p>رتّبي الرموز حتى تظهر إشارة الطريق إلى القرية.<br>اضغطي الرموز بهذا الترتيب، من اليسار إلى اليمين:<br><b style="color:#ffd8a8;font-size:15px">١ 🌸 زهرة &nbsp; ← &nbsp; ٢ 🦋 فراشة &nbsp; ← &nbsp; ٣ 🍃 ورقة</b><br>تلميح: اتبعي ترتيب الرموز الظاهر في التعليمات.</p><div id="sequence" class="sequence">_ _ _</div><div class="tiles"><button class="tile" data-symbol="leaf">🍃<span>ورقة</span></button><button class="tile" data-symbol="butterfly">🦋<span>فراشة</span></button><button class="tile" data-symbol="blossom">🌸<span>زهرة</span></button></div><div id="puzzleFeedback" style="font-size:12px;color:#ffcadf;min-height:19px"></div><button id="resetPuzzle" class="secondaryButton">إعادة المحاولة</button> <button id="closePuzzle" class="secondaryButton">إغلاق</button></div></div>
+<section id="endingScreen"><div class="startCard"><div style="font-size:46px">🌸🦋🌸</div><h1 style="font-size:38px">انفتحت البوابة!<br>سنفور بأمان 🐈</h1><p class="subtitle">نجحتِ يا نبأ! أكملتِ المهمات العشر، وأعدتِ سنفور إلى بيته، ثم جمعتِ المفاتيح الثلاثة وفتحتِ البوابة السرية. انتهت المغامرة بنجاح!</p><div id="endingLetter">إلى نبأ ♡
+
+أردت أن أصنع عالماً صغيراً تستكشفينه، وتجدين فيه أشياء جميلة مخبأة عند كل زاوية.
+
+إذا عجبتج اللعبة وابتسمتي، خلّيني أشوف ابتسامتج بسناب 🥹❤️ (إذا تحبين طبعاً).
+
+أحبج،
+أحمد ♡</div><button id="playAgain" class="mainButton">↻ أعيدي الاستكشاف</button><div class="smallhint">رحلة نبأ · صُنعت بمحبة</div></div></section>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+if(!window.THREE){$('loadtext').textContent='تعذر تحميل محرك الرسوم ثلاثية الأبعاد. اتصلي بالإنترنت ثم أعيدي التحميل.';return;}
+const THREE=window.THREE;
+let scene,camera,renderer,clock,player,playerParts={},yaw=0,camYaw=0,started=false,done=false,nearby=null,toastTimer=0;
+let interactables=[],obstacles=[],trees=[],butterflies=[],cats=[],petalItems=[],keyItems=[],puzzleSequence=[],lastTime=0,nextStepSoundAt=0;
+const keys={};let stick={x:0,y:0,active:false,id:null},jumpQueued=false,running=false,walkPhase=0;
+const state={stage:0,petals:0,keys:0,heldCat:false,puzzleSolved:false};
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const mat=(color,roughness=.88,metalness=0,opts={})=>new THREE.MeshStandardMaterial({color,roughness,metalness,...opts});
+const M={grass:mat('#174b21'),grass2:mat('#347d2b'),path:mat('#9b6924'),bark:mat('#392216'),bark2:mat('#654027'),pink:mat('#f43f91'),pink2:mat('#ff70b5'),pink3:mat('#a9124c'),leaf:mat('#103b1d'),leaf2:mat('#3b8c2a'),dark:mat('#080f10'),brown:mat('#382016'),brown2:mat('#754020'),cream:mat('#bda05b'),skin:mat('#c7835f'),skin2:mat('#df9f79'),eye:mat('#20130d'),gold:mat('#f6b91b',.22,.15,{emissive:'#ffb800',emissiveIntensity:.8}),water:mat('#087796',.16,.12,{transparent:true,opacity:.96}),stone:mat('#455049'),stone2:mat('#786a42'),red:mat('#762821'),white:mat('#d8c18b'),purple:mat('#67418c'),black:mat('#090c13')};
+function mesh(geo,material,parent=scene,pos=[0,0,0],rot=[0,0,0],scale=[1,1,1]){const o=new THREE.Mesh(geo,material);o.position.set(...pos);o.rotation.set(...rot);o.scale.set(...scale);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
+function box(w,h,d,material,parent=scene,pos=[0,0,0],rot=[0,0,0]){return mesh(new THREE.BoxGeometry(w,h,d),material,parent,pos,rot)}
+function sphere(r,material,parent=scene,pos=[0,0,0],scale=[1,1,1],seg=16){return mesh(new THREE.SphereGeometry(r,seg,Math.max(8,Math.round(seg*.65))),material,parent,pos,[0,0,0],scale)}
+function cyl(rt,rb,h,material,parent=scene,pos=[0,0,0],rot=[0,0,0],segments=12){return mesh(new THREE.CylinderGeometry(rt,rb,h,segments),material,parent,pos,rot)}
+function group(parent=scene,pos=[0,0,0]){const g=new THREE.Group();g.position.set(...pos);parent.add(g);return g;}
+function lineBetween(parent,a,b,r,material,segments=8){const A=V(...a),B=V(...b),d=B.clone().sub(A);const o=cyl(r,r,d.length(),material,parent,A.clone().add(B).multiplyScalar(.5).toArray(),[0,0,0],segments);o.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());return o;}
+
+let audioCtx=null,musicOn=true,musicTimer=null,masterGain=null;
+function startForestAudio(){
+ if(!musicOn)return;
+ try{
+  if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=.18;masterGain.connect(audioCtx.destination);}
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  if(musicTimer)return;
+  // Gentle original ambient motif generated in-browser; no external audio files required.
+  const notes=[261.63,329.63,392,329.63,293.66,349.23,440,392,261.63,329.63,440,392,293.66,349.23,392,329.63];let idx=0;
+  musicTimer=setInterval(()=>{if(!audioCtx||!musicOn)return;const now=audioCtx.currentTime;const freq=notes[idx++%notes.length];const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type='sine';osc.frequency.value=freq;gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.11,now+.08);gain.gain.exponentialRampToValueAtTime(.0001,now+1.15);osc.connect(gain);gain.connect(masterGain);osc.start(now);osc.stop(now+1.2);
+    if(idx%4===0){const bell=audioCtx.createOscillator(),bg=audioCtx.createGain();bell.type='triangle';bell.frequency.value=freq*2;bg.gain.setValueAtTime(.0001,now);bg.gain.exponentialRampToValueAtTime(.035,now+.03);bg.gain.exponentialRampToValueAtTime(.0001,now+.8);bell.connect(bg);bg.connect(masterGain);bell.start(now);bell.stop(now+.85);}
+  },720);
+  // Soft wind/bird-like ambience
+  const buffer=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*.12;
+  const noise=audioCtx.createBufferSource();noise.buffer=buffer;noise.loop=true;const filter=audioCtx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=550;const ng=audioCtx.createGain();ng.gain.value=.018;noise.connect(filter);filter.connect(ng);ng.connect(masterGain);noise.start();
+ }catch(e){console.log('Audio unavailable',e);}
+}
+function toggleForestAudio(){musicOn=!musicOn;if(masterGain&&audioCtx)masterGain.gain.setTargetAtTime(musicOn ? 0.18 : 0,audioCtx.currentTime,.15);$('soundButton').textContent=musicOn?'♫ الصوت: يعمل':'♫ الصوت: متوقف';if(musicOn)startForestAudio();}
+
+function playCatMeow(){try{if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=.18;masterGain.connect(audioCtx.destination);}if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime;[0,.19].forEach((delay,i)=>{const osc=audioCtx.createOscillator(),g=audioCtx.createGain();osc.type='triangle';osc.frequency.setValueAtTime(i?690:520,now+delay);osc.frequency.exponentialRampToValueAtTime(i?420:760,now+delay+.16);g.gain.setValueAtTime(.0001,now+delay);g.gain.exponentialRampToValueAtTime(.16,now+delay+.025);g.gain.exponentialRampToValueAtTime(.0001,now+delay+.23);osc.connect(g);g.connect(masterGain);osc.start(now+delay);osc.stop(now+delay+.24);});}catch(e){}}
+
+function playFootstep(){try{if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=.2;masterGain.connect(audioCtx.destination);}if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime;const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type='sine';osc.frequency.setValueAtTime(118,now);osc.frequency.exponentialRampToValueAtTime(58,now+.085);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.035,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+.1);osc.connect(gain);gain.connect(masterGain);osc.start(now);osc.stop(now+.105);}catch(e){}}
+function playInteractionSound(kind='sparkle'){
+ try{if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=.2;masterGain.connect(audioCtx.destination);}if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime;const notes=kind==='hello'?[523,659]:kind==='step'?[392,494]:kind==='key'?[659,880,1175]:[740,988];notes.forEach((freq,i)=>{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type=kind==='step'?'triangle':'sine';osc.frequency.setValueAtTime(freq,now+i*.085);gain.gain.setValueAtTime(.0001,now+i*.085);gain.gain.exponentialRampToValueAtTime(.095,now+i*.085+.018);gain.gain.exponentialRampToValueAtTime(.0001,now+i*.085+.22);osc.connect(gain);gain.connect(masterGain);osc.start(now+i*.085);osc.stop(now+i*.085+.24);});}catch(e){}
+}
+const missionNames=['تحدثي مع الجدة نون واسمعي قصة سنفور','افحصي شريط الساكورا الممزق','اتبعي آثار أقدام سنفور إلى جذع الشجرة','اعثري على سنفور في فسحة الغابة','طمئني سنفور وداعبيه حتى يثق بكِ','اجمعي ثلاث وجبات صغيرة لسنفور','احملي سنفور وابدئي رحلة العودة','اتبعي الضوء الذهبي واعبري جسر الحجارة','حلّي لغز الأنوار لفتح طريق العودة','أعيدي سنفور إلى الجدة نون وبيته'];
+function renderMissionList(){const completedCount=done?10:Math.max(0,Math.min(10,state.stage));const main=missionNames.map((n,i)=>`<div style="display:flex;gap:9px;align-items:center;padding:9px 10px;border-radius:11px;background:${i<completedCount?'#185c2b':'#071b12'};border:1px solid ${i<completedCount?'#7ce15b':'#3b6740'}"><span>${i<completedCount?'✅':i===state.stage?'🟡':'🔒'}</span><span style="font-size:13px;color:${i===state.stage?'#ffdf54':'#e5efca'}">${i+1}. ${n}</span></div>`).join('');const bonus=`<div style="display:flex;gap:9px;align-items:center;padding:10px;border-radius:11px;background:${done?'#185c2b':state.stage===10?'#503d08':'#071b12'};border:1px solid ${done?'#7ce15b':'#d9ad35'}"><span>${done?'✅':state.stage===10?'🔑':'🔒'}</span><span style="font-size:13px;color:#ffdf54">مهمة إضافية: اجمعي ٣ مفاتيح وافتحي البوابة (${state.keys}/3)</span></div>`;$('missionList').innerHTML=main+bonus;}
+function createScene(){
+ scene=new THREE.Scene();scene.background=new THREE.Color('#4b8fc0');scene.fog=new THREE.FogExp2('#285235',.00155);
+ camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,520);camera.position.set(0,4,8);
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.setSize(innerWidth,innerHeight);renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.82;$('game').appendChild(renderer.domElement);
+ clock=new THREE.Clock();scene.add(new THREE.HemisphereLight('#d7edc2','#0a2816',.58));const sun=new THREE.DirectionalLight('#ffc044',1.55);sun.position.set(-12,20,6);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-60;sun.shadow.camera.right=60;sun.shadow.camera.top=60;sun.shadow.camera.bottom=-60;scene.add(sun);const fill=new THREE.DirectionalLight('#76b8e0',0.20);fill.position.set(10,9,-14);scene.add(fill);const warmFill=new THREE.PointLight('#ffb922',1.05,24);warmFill.position.set(0,5,8);scene.add(warmFill);
+ // ground and horizon
+ mesh(new THREE.PlaneGeometry(360,360),M.grass,scene,[0,-.12,-14],[-Math.PI/2,0,0]);
+ for(let i=0;i<12;i++){const mountain=cyl(.1,3+Math.random()*4,7+Math.random()*9,mat(i%2?'#455d79':'#5b6688'),scene,[-48+i*9,3,-49-Math.random()*7],[0,0,0],7);}
+ makePaths();makeVillage();makeTrees();makeGroundDetail();makeFlowers();makeShrineAndGate();makeInteractables();makeNavigationMarkers();makeButterflies();makeAmbientCats();makeDeerAndWalkers();makePlayer();makePawprints();makeGlowMotes();
+ window.addEventListener('resize',resize);document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase()))e.preventDefault();if(e.key.toLowerCase()==='e'||e.key==='Enter')doInteract();if(e.key===' '){jumpQueued=true;}if(e.key.toLowerCase()==='shift')running=true;});document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key.toLowerCase()==='shift')running=false;});
+ renderer.domElement.addEventListener('pointerdown',onCanvasPointerDown);renderer.domElement.addEventListener('pointermove',onCanvasPointerMove);renderer.domElement.addEventListener('pointerup',onCanvasPointerUp);renderer.domElement.addEventListener('pointercancel',onCanvasPointerUp);
+ setupTouch();
+ $('soundButton').onclick=toggleForestAudio;
+ $('missionButton').onclick=()=>{renderMissionList();$('missionsModal').style.display='flex';};$('closeMissions').onclick=()=>{$('missionsModal').style.display='none';};
+ $('begin').onclick=()=>{startForestAudio();started=true;$('startScreen').classList.add('hidden');$('hud').style.display='block';showToast('المهمة ١ من ١٠','تحدثي مع الجدة نون لتبدئي البحث عن سنفور. تحركي بالدائرة اليسرى، اقتربي منها ثم اضغطي «تفاعل».');};
+ $('interactBtn').addEventListener('pointerdown',e=>{e.preventDefault();doInteract();});$('jumpBtn').addEventListener('pointerdown',e=>{e.preventDefault();playInteractionSound('step');jumpQueued=true;});$('runBtn').addEventListener('pointerdown',e=>{e.preventDefault();running=true;});$('runBtn').addEventListener('pointerup',()=>running=false);$('runBtn').addEventListener('pointerleave',()=>running=false);$('runBtn').addEventListener('pointercancel',()=>running=false);
+ $('closePuzzle').onclick=()=>{$('puzzleModal').style.display='none';};$('resetPuzzle').onclick=()=>{puzzleSequence=[];updatePuzzleUI();$('puzzleFeedback').textContent='تم مسح الترتيب. حاولي من جديد.';};document.querySelectorAll('[data-symbol]').forEach(b=>b.onclick=()=>pickPuzzle(b.dataset.symbol));
+ $('playAgain').onclick=()=>{location.reload();};
+ updateQuestUI();$('loading').classList.add('hidden');$('startScreen').classList.remove('hidden');animate();
+}
+function makePaths(){
+ const pts=[[0,8],[0,5],[1,2],[1,-1],[-1,-4],[-3,-7],[-5,-11],[-8,-15],[-7,-18],[-4,-21],[0,-25],[1,-28],[0,-32],[0,-39]];
+ for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);const p=box(4.8,.09,len,M.path,scene,[(a[0]+b[0])/2,.005,(a[1]+b[1])/2]);p.rotation.y=Math.atan2(dx,dz);p.castShadow=false;}
+ // stone stepping path to shrine
+ for(let i=0;i<9;i++){let x=5+Math.sin(i*.8)*1.7,z=-16-i*1.55;const s=mesh(new THREE.CylinderGeometry(1.05,1.15,.22,7),M.stone,scene,[x,.05,z],[0,Math.sin(i)*.2,0]);s.castShadow=true;}
+ // pond
+ mesh(new THREE.CircleGeometry(4.5,40),M.water,scene,[9,-.015,-25],[-Math.PI/2,0,0]);for(let i=0;i<16;i++){const a=i*Math.PI*2/16;const r=4.2;mesh(new THREE.DodecahedronGeometry(.4,0),M.stone,scene,[9+Math.cos(a)*r,.03,-25+Math.sin(a)*r],[Math.random(),Math.random(),0],[1,.45,1]);}
+}
+function makeLantern(x,z){const g=group(scene,[x,0,z]);cyl(.06,.08,.7,M.bark,g,[0,.36,0]);const l=box(.34,.35,.34,mat('#c47e69',.6,0,{emissive:'#7d342d',emissiveIntensity:.3}),g,[0,.85,0]);cyl(.23,.23,.06,M.gold,g,[0,1.06,0]);sphere(.11,mat('#ffd796',.2,0,{emissive:'#ffb76b',emissiveIntensity:1.8}),g,[0,.84,0],[1,1,1],12);}
+function makeHouse(x,z,rot=0){const g=group(scene,[x,0,z]);g.rotation.y=rot;box(2.5,1.7,2,M.cream,g,[0,.9,0]);box(2.9,.18,2.35,M.brown,g,[0,1.85,0]);const roof1=box(1.75,.14,2.6,mat('#812c4d'),g,[-.57,2.3,0],[0,0,-.62]);const roof2=box(1.75,.14,2.6,mat('#812c4d'),g,[.57,2.3,0],[0,0,.62]);box(.48,.94,.08,M.brown,g,[0,.5,1.05]);box(.48,.48,.08,mat('#c51f65'),g,[-.65,1.15,1.04]);box(.48,.48,.08,mat('#c51f65'),g,[.65,1.15,1.04]);}
+function makeVillage(){
+ makeHouse(-4,3,.2);makeHouse(6,1,-.25);makeHouse(6,7,.4);makeHouse(-7,8,-.4);
+ for(const [x,z] of [[-2,1],[3,7],[-7,0],[8,4],[-6,-2],[3,-8]])makeLantern(x,z);
+ // short fences and flower boxes
+ for(let i=0;i<5;i++){box(.08,.65,.08,M.bark,scene,[-7+i*.8,.32,1.6]);}box(3.5,.07,.07,M.bark,scene,[-5.4,.5,1.6]);
+ // village sign
+ const sign=group(scene,[-1,4,-.8]);cyl(.09,.11,1.6,M.bark,sign,[0,.8,0]);box(1.5,.55,.12,mat('#805449'),sign,[0,1.35,0]);
+}
+function makeTree(x,z,size=1,variant=0){const g=group(scene,[x,0,z]);g.scale.setScalar(size);const trunk=cyl(.22,.38,2.8,M.bark,g,[0,1.4,0],[0,0,0],10);lineBetween(g,[0,1.5,0],[-.75,2.4,0],.12,M.bark);lineBetween(g,[.05,1.6,0],[.72,2.3,.12],.12,M.bark2);
+ const leafMats=variant%4===0?[M.pink2,M.pink, M.leaf2, mat('#e83b8c')]:[M.leaf,M.leaf2,mat('#3f8444'),mat('#8bb75a'),M.pink2];
+ for(let i=0;i<10;i++){const angle=i*2.399+variant;const y=2.45+(i%4)*.34;const r=.65+(i%4)*.13;const sc=.82+((i*7)%5)*.09;sphere(.72,leafMats[(i+variant)%leafMats.length],g,[Math.cos(angle)*r,y,Math.sin(angle)*r],[sc,.82,sc],14);}
+ // falling/pinned petals
+ for(let i=0;i<3;i++){const pet=mesh(new THREE.PlaneGeometry(.13,.22),M.pink2,g,[Math.sin(i*2)*.55,2.1+i*.35,Math.cos(i*1.7)*.6],[Math.random(),Math.random(),Math.random()]);pet.material=pet.material.clone();pet.material.side=THREE.DoubleSide;}
+ trees.push({x,z,r:.48*size});return g;}
+function makeTrees(){let seed=12345;const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};const anchors=[[0,8],[1,2],[-2,-7],[-8,-15],[0,-25],[0,-39],[-4,3],[6,1],[6,7],[-7,8]];
+ for(let i=0;i<230;i++){let x=-78+rand()*156,z=-105+rand()*130;if(anchors.some(a=>Math.hypot(x-a[0],z-a[1])<3.2))continue;let size=.72+rand()*.65;makeTree(x,z,size,i%5);if(i%5===0)makeLantern(x+(rand()-.5)*2,z+1.2);}
+ // nearby decorative trees frame village, shrine and water
+ [[-12,4,1.2],[12,3,1.1],[-13,-17,1.2],[13,-20,1.15],[-9,-29,1.2],[9,-34,1.25]].forEach(a=>makeTree(...a));
+}
+
+function makeGroundDetail(){
+ // natural shrubs, ferns, stones and fallen logs break up the empty ground
+ const rng=(a,b)=>a+Math.random()*(b-a);
+ for(let i=0;i<420;i++){
+   const x=rng(-78,78),z=rng(-100,28);
+   if(Math.abs(x)<2.0 && z<8 && z>-40) continue;
+   const g=group(scene,[x,0,z]);
+   if(i%3!==0){
+     for(let j=0;j<4+(i%4);j++){
+       const a=j*2.4,rr=.16+(j%3)*.11;
+       sphere(.22+(j%2)*.06, j%2?M.leaf:M.leaf2,g,[Math.cos(a)*rr,.17+(j%3)*.06,Math.sin(a)*rr],[1.1,.8,1],9);
+     }
+   }else{
+     const rock=mesh(new THREE.DodecahedronGeometry(.25+(i%4)*.07,0),i%2?M.stone:M.stone2,g,[0,.12,0],[rng(0,1),rng(0,1),rng(0,1)],[1.4,.7,1]);rock.castShadow=true;
+     for(let j=0;j<3;j++)cyl(.012,.018,.24,M.leaf,g,[Math.cos(j*2.1)*.22,.12,Math.sin(j*2.1)*.22],[.3,0,j*.4],5);
+   }
+ }
+ // fallen sakura petals scattered along the path
+ const petalMat=mat('#f14491',.8,0,{side:THREE.DoubleSide});
+ for(let i=0;i<850;i++){const x=rng(-18,18),z=rng(-48,18);const pet=mesh(new THREE.PlaneGeometry(.09,.15),petalMat,scene,[x,.025,z],[Math.PI/2,rng(0,6),rng(0,6)]);pet.castShadow=false;pet.receiveShadow=false;}
+}
+
+function makeFlowers(){for(let i=0;i<620;i++){const x=-76+Math.random()*152,z=-98+Math.random()*125;if(Math.abs(x)<1.3&&z<8&&z>-40)continue;const g=group(scene,[x,0,z]);const colors=[M.pink2,mat('#d68b12'),mat('#b34e93'),mat('#f0c12b'),mat('#e7a93c'),mat('#50a82e')];cyl(.018,.025,.16,M.leaf,g,[0,.08,0]);for(let k=0;k<5;k++){const a=k*Math.PI*2/5;sphere(.06,colors[i%colors.length],g,[Math.cos(a)*.06,.16,Math.sin(a)*.06],[1,.7,1],8);}sphere(.035,M.gold,g,[0,.17,0],[1,1,1],8);}}
+function createCat(x,z,fur,scale=1,mochi=false){const g=group(scene,[x,.03,z]);g.scale.setScalar(scale);const fm=mat(fur,.82);sphere(.37,fm,g,[0,.42,0],[1.2,.72,.68],16);sphere(.255,fm,g,[0,.75,-.22],[1,1,.86],16); // ears toward front
+ for(const s of [-1,1]){mesh(new THREE.ConeGeometry(.105,.25,4),fm,g,[s*.16,.96,-.25],[0,0,s*-.16]);mesh(new THREE.ConeGeometry(.05,.14,4),mat('#ed9cba'),g,[s*.16,.96,-.275],[0,0,s*-.16]);sphere(.035,M.eye,g,[s*.09,.77,-.442],[.75,1.3,.5],10);sphere(.018,M.white,g,[s*.08,.79,-.458],[1,1,.6],8);}
+ sphere(.04,mat('#bd778e'),g,[0,.68,-.455],[1,.7,.5],8);
+ // paws
+ for(const s of [-1,1])for(const f of [0,1])sphere(.095,fm,g,[s*.23,.18,f?-.2:.2],[.9,.75,1],10);
+ // tail curve
+ const curve=new THREE.QuadraticBezierCurve3(V(.3,.45,.17),V(.68,.65,.3),V(.53,.93,.48));const tail=mesh(new THREE.TubeGeometry(curve,10,.045,6,false),fm,g,[0,0,0]);
+ if(mochi){const collar=cyl(.06,.07,.09,mat('#c53f75'),g,[0,.58,-.15],[Math.PI/2,0,0],10);sphere(.06,M.gold,g,[.1,.58,-.2],[1,1,1],8);}
+ return {group:g,base:V(x,0,z),mochi,scale};}
+function makeElder(){const g=group(scene,[2,0,2]);cyl(.27,.4,1.15,mat('#d6b8b4'),g,[0,.64,0]);sphere(.29,M.skin,g,[0,1.42,-.02],[.8,1,.75]);sphere(.33,mat('#d8d1d6'),g,[0,1.62,.04],[1,.75,.85]);sphere(.24,mat('#d8d1d6'),g,[0,1.42,.14],[1,.8,.55]);for(let s of [-1,1])sphere(.026,M.eye,g,[s*.09,1.45,-.22],[1,1,.6],8);cyl(.26,.28,.12,M.gold,g,[0,1.13,0]);return g;}
+function makeBush(){const g=group(scene,[-2,0,-7]);for(let i=0;i<7;i++){const a=i*2.4;sphere(.38, i%2?M.leaf:M.leaf2,g,[Math.cos(a)*.42,.35+(i%3)*.12,Math.sin(a)*.4],[1,1.1,1],10);}const ribbon=mesh(new THREE.PlaneGeometry(.5,.23),M.pink2,g,[.16,.7,-.18],[0,0,-.25]);ribbon.material.side=THREE.DoubleSide;sphere(.09,M.pink3,g,[0,.66,-.2],[1,.8,.5],8);return g;}
+function makeShrineAndGate(){
+ // torii at shrine, behind path
+ const x=0,z=-25;for(const off of [-1.7,1.7]){cyl(.15,.19,3.4,M.red,scene,[x+off,1.7,z],[0,0,0],10);box(.46,.1,.45,mat('#4c3944'),scene,[x+off,3.4,z]);}box(4.5,.26,.46,M.red,scene,[x,3.35,z]);box(3.8,.16,.42,M.red,scene,[x,3.68,z]);
+ // shrine platform
+ box(5.6,.35,4.2,M.stone,scene,[0,.1,-27.4]);box(3.4,2.2,2.5,mat('#815260'),scene,[0,1.2,-28.3]);box(4,.22,3,M.red,scene,[0,2.36,-28.3]);box(4.4,.16,3.2,mat('#4b2a3a'),scene,[0,2.53,-28.3],[0,0,0]);
+ // stair steps
+ for(let i=0;i<3;i++)box(2.6-i*.22,.13,.55,M.stone2,scene,[0,.25+i*.12,-25.9-i*.48]);
+ // locked gate to secret garden
+ const gx=0,gz=-67;for(let s of [-1,1])cyl(.16,.2,3.4,mat('#8b547f'),scene,[gx+s*2,1.7,gz],[0,0,0],10);box(4.4,.22,.35,mat('#8b547f'),scene,[gx,3.35,gz]);const portal=mesh(new THREE.TorusGeometry(1.25,.11,8,36),mat('#b72fef',.25,.1,{emissive:'#a014ff',emissiveIntensity:1.6}),scene,[0,1.6,gz],[0,0,0]);portal.name='portal';scene.userData.portal=portal;box(5,.12,2,M.stone2,scene,[0,.05,-67]);
+ // distant glowing garden decorative clusters (visible beyond portal)
+ for(let i=0;i<12;i++){const a=i*2.399;const px=Math.cos(a)*6,pz=-71+Math.sin(a)*4;makeTree(px,pz,.6+(i%3)*.15,i);makeLantern(px,pz);}
+}
+function makeNavigationMarkers(){
+ const defs=[['elder',2,0,2],['ribbon',-2,0,-7],['log',-5,0,-10],['mochi',-8,0,-15],['fragment0',-12,0,-5],['fragment1',5,0,-15],['fragment2',8,0,-22],['bridge',5,0,-21],['shrine',0,0,-28.3],['key0',-11,0,-32],['key1',12,0,-45],['key2',-8,0,-57],['gate',0,0,-67]];
+ scene.userData.navMarkers={};
+ defs.forEach(([id,x,y,z])=>{const g=group(scene,[x,0,z]);const glowMat=mat('#ffbb18',.12,0,{transparent:true,opacity:.58,emissive:'#ff9f00',emissiveIntensity:2.7,side:THREE.DoubleSide,depthWrite:false});const beam=mesh(new THREE.CylinderGeometry(.10,.38,4.3,12,1,true),glowMat,g,[0,2.25,0]);beam.castShadow=false;const ring=mesh(new THREE.TorusGeometry(.58,.075,8,28),mat('#ffe14b',.15,.05,{emissive:'#ffc400',emissiveIntensity:3}),g,[0,.13,0],[Math.PI/2,0,0]);const diamond=mesh(new THREE.OctahedronGeometry(.37),mat('#fff4a3',.08,.02,{emissive:'#ffb800',emissiveIntensity:3.4}),g,[0,4.35,0],[0,0,Math.PI/4]);const light=new THREE.PointLight('#ffb91e',2.8,11);light.position.set(0,2.2,0);g.add(light);scene.userData.navMarkers[id]={group:g,beam,ring,diamond,light};});
+}
+function updateNavigationMarkers(t){const n=scene.userData.navMarkers;if(!n)return;let active=[];
+ if(state.stage===0||state.stage===9)active=['elder'];else if(state.stage===1)active=['ribbon'];else if(state.stage===2)active=['log'];else if(state.stage===3||state.stage===4||state.stage===6)active=['mochi'];else if(state.stage===5)active=petalItems.filter(p=>!p.taken).map(p=>'fragment'+petalItems.indexOf(p));else if(state.stage===7)active=['bridge'];else if(state.stage===8)active=['shrine'];else if(state.stage===10){active=state.keys<3?keyItems.filter(k=>!k.taken).map(k=>'key'+keyItems.indexOf(k)):['gate'];}
+ Object.entries(n).forEach(([id,m])=>{m.group.visible=active.includes(id);m.diamond.position.y=4.15+Math.sin(t*2.7)*.28;m.diamond.rotation.y=t*.95;m.ring.rotation.z=t*.68;const pulse=.82+Math.sin(t*4.1)*.22;m.light.intensity=2.4*pulse;m.beam.material.opacity=.43+Math.sin(t*3.3)*.12;});
+ const help=$('navHelp');if(help){help.style.display=started?'block':'none';const msgs={0:'اتبعي الضوء الذهبي إلى الجدة نون',1:'افحصي الشريط الممزق قرب الشجيرة',2:'اتبعي آثار الأقدام إلى جذع الشجرة المضيء',3:'سنفور مختبئ في فسحة الغابة',4:'اقتربي من سنفور وطمئنيه بصوت مياو',5:'اجمعي الوجبات الثلاث المضيئة لسنفور',6:'احملي سنفور واتبعي الضوء للعودة',7:'اتبعي الأنوار فوق جسر الحجارة',8:'حلّي لغز الأنوار، ثم عودي إلى الجدة',9:'عودي إلى الجدة نون وأعيدي سنفور إلى بيته',10:state.keys<3?'اجمعي المفاتيح الذهبية الثلاثة': 'اتبعي الضوء الذهبي إلى البوابة واضغطي تفاعل'};help.textContent=msgs[state.stage]||'أحسنتِ!';}}
+
+function makeInteractables(){
+ const elder=makeElder();interactables.push({id:'elder',group:elder,pos:V(2,0,2),label:state.stage===9?'أعيدي سنفور إلى الجدة نون':'تحدثي مع الجدة نون',active:()=>state.stage===0||state.stage===9,onInteract:()=>{if(state.stage===0){state.stage=1;showToast('المهمة ١ اكتملت','قالت الجدة نون إن سنفور تبع فراشة إلى الغابة، وآخر ما رأته كان شريط ساكورا ممزقاً.');}else if(state.stage===9){if(playerParts.carriedCat){player.remove(playerParts.carriedCat);playerParts.carriedCat=null;}state.heldCat=false;const homeSnufor=createCat(3.0,1.6,'#d5d5d5',.72,true);cats.push(homeSnufor);state.stage=10;showToast('اكتملت المهمات العشر!','سلّمتِ سنفور إلى الجدة نون، وصار واقفاً بجانبها بأمان. بقيت مهمة سرية: اجمعي ٣ مفاتيح ذهبية متباعدة، ثم توجهي إلى البوابة واضغطي «تفاعل».',5200);}updateQuestUI();}});
+ const bush=makeBush();interactables.push({id:'ribbon',group:bush,pos:V(-2,0,-7),label:'افحصي شريط الساكورا الممزق',active:()=>state.stage===1,onInteract:()=>{state.stage=2;showToast('المهمة ٢ اكتملت','وجدتِ خيطاً من فرو سنفور قرب الشريط. آثار الأقدام تتجه إلى جذع شجرة مجوّف.');updateQuestUI();}});
+ // Clearly visible fallen hollow-log clue for mission 3.
+ const log=group(scene,[-5,0,-10]);const logMat=mat('#542b17');const trunk=cyl(.28,.34,2.3,logMat,log,[0,.3,0],[Math.PI/2,0,.08],12);cyl(.19,.19,.05,mat('#17130d'),log,[0,.3,-1.13],[Math.PI/2,0,0],12);const clue=mesh(new THREE.OctahedronGeometry(.22),mat('#ffbe22',.1,0,{emissive:'#ff9800',emissiveIntensity:2.5}),log,[.12,.8,-.65],[0,0,0],[1,1.2,1]);const clueLight=new THREE.PointLight('#ffb51b',1.7,5);clueLight.position.set(.12,.8,-.65);log.add(clueLight);interactables.push({id:'log',group:log,pos:V(-5,0,-10),label:'افحصي جذع الشجرة المضيء',active:()=>state.stage===2,onInteract:()=>{state.stage=3;showToast('المهمة ٣ اكتملت','آثار الأقدام تدخل إلى فسحة الغابة. اسمعي المياو وابحثي بين الأشجار.');updateQuestUI();}});
+ const mochi=createCat(-8,-15,'#d5d5d5',1.08,true);cats.push(mochi);interactables.push({id:'mochi',group:mochi.group,pos:V(-8,0,-15),label:state.stage===3?'اعثري على سنفور':'تفاعلي مع سنفور',active:()=>state.stage===3||state.stage===4||state.stage===6,onInteract:()=>{playCatMeow();if(state.stage===3){state.stage=4;showToast('المهمة ٤ اكتملت','هذا هو سنفور! يبدو خائفاً. اقتربي منه مرة ثانية حتى تطمئنيه.');}else if(state.stage===4){state.stage=5;showToast('المهمة ٥ اكتملت','سنفور اطمأن إليكِ. يحتاج ثلاث وجبات صغيرة قبل رحلة العودة.');}else if(state.stage===6){state.stage=7;state.heldCat=true;playerParts.carriedCat=createCat(0,0,'#d5d5d5',.55,true).group;playerParts.carriedCat.position.set(.48,.82,-.05);player.add(playerParts.carriedCat);scene.remove(mochi.group);showToast('المهمة ٧ اكتملت','سنفور صار بين إيديكِ! اتبعي الضوء الذهبي باتجاه جسر الحجارة.');}updateQuestUI();}});
+ // Three collectible treats; saturated golden fish-shaped charms to be easy to see.
+ const treats=[[-12,0,-5],[5,0,-15],[8,0,-22]];treats.forEach((p,i)=>{const g=group(scene,[p[0],.2,p[2]]);const goldMat=mat(['#ffb319','#ffcf26','#ff8e22'][i],.18,.05,{emissive:['#ff8500','#ffc000','#ff6700'][i],emissiveIntensity:1.7});sphere(.19,goldMat,g,[0,.38,0],[1.25,.6,.65],12);mesh(new THREE.ConeGeometry(.14,.24,3),goldMat,g,[.27,.38,0],[0,0,-Math.PI/2]);sphere(.032,mat('#10251c'),g,[-.12,.41,-.10],[1,1,.5],8);const ring=mesh(new THREE.TorusGeometry(.3,.035,8,20),mat('#ffe86b',.1,0,{emissive:'#ffb300',emissiveIntensity:2}),g,[0,.23,0],[Math.PI/2,0,0]);const l=new THREE.PointLight('#ffb21b',1.4,4);l.position.set(0,.55,0);g.add(l);petalItems.push({group:g,pos:V(p[0],0,p[2]),taken:false});interactables.push({id:'petal'+i,group:g,pos:V(p[0],0,p[2]),label:'اجمعي وجبة سنفور المضيئة',active:()=>state.stage===5&&!petalItems[i].taken,onInteract:()=>{petalItems[i].taken=true;scene.remove(g);state.petals++;$('petalCount').textContent=state.petals+'/3';showToast('وجبة سنفور',`جمعتِ ${state.petals} من أصل ٣ وجبات.`);if(state.petals>=3){state.stage=6;showToast('المهمة ٦ اكتملت','أصبحت الوجبات جاهزة. عودي إلى سنفور واحمليه برفق.');}updateQuestUI();}});});
+ // Bridge waypoint, used as the eighth mission checkpoint.
+ const bridge=group(scene,[5,0,-21]);const postmat=mat('#714018');cyl(.08,.10,1.7,postmat,bridge,[-1,.85,0]);cyl(.08,.10,1.7,postmat,bridge,[1,.85,0]);box(2.35,.12,.16,mat('#c48a24',.5,0,{emissive:'#a95e09',emissiveIntensity:.25}),bridge,[0,1.45,0]);for(let i=0;i<3;i++)sphere(.13,mat('#ffc52b',.15,0,{emissive:'#ffa600',emissiveIntensity:2}),bridge,[-.55+i*.55,1.6,0],[1,1,1],10);interactables.push({id:'bridge',group:bridge,pos:V(5,0,-21),label:'تأكدي من طريق جسر الحجارة',active:()=>state.stage===7,onInteract:()=>{state.stage=8;showToast('المهمة ٨ اكتملت','الجسر آمن. المعبد سيكشف الطريق الأقصر إلى القرية إذا حللتِ لغز الأنوار.');updateQuestUI();}});
+ const shrine=group(scene,[0,0,-28.3]);interactables.push({id:'shrine',group:shrine,pos:V(0,0,-28.3),label:'حلّي لغز الأنوار',active:()=>state.stage===8&&!state.puzzleSolved,onInteract:()=>{$('puzzleModal').style.display='flex';puzzleSequence=[];updatePuzzleUI();$('puzzleFeedback').textContent='';}});
+ // Bonus epilogue: three unmistakable, glowing golden keys along the route to the portal.
+ const keyPlaces=[[-11,0,-32],[12,0,-45],[-8,0,-57]];
+ keyPlaces.forEach((p,i)=>{
+   const g=group(scene,[p[0],.12,p[2]]);g.visible=false;const goldKey=mat('#ffca23',.22,.25,{emissive:'#ff9d00',emissiveIntensity:1.25});const lightKey=mat('#fff1a0',.18,.08,{emissive:'#ffd52a',emissiveIntensity:1.8});
+   mesh(new THREE.TorusGeometry(.22,.055,8,18),lightKey,g,[-.15,.48,0],[Math.PI/2,0,0]);box(.42,.085,.085,goldKey,g,[.13,.48,0]);box(.09,.19,.09,goldKey,g,[.27,.39,0]);box(.09,.15,.09,goldKey,g,[.39,.41,0]);
+   const halo=mesh(new THREE.TorusGeometry(.36,.025,6,24),lightKey,g,[0,.18,0],[Math.PI/2,0,0]);const light=new THREE.PointLight('#ffc21b',1.8,5);light.position.set(0,.7,0);g.add(light);
+   keyItems.push({group:g,pos:V(p[0],0,p[2]),taken:false,halo,light});
+   interactables.push({id:'key'+i,group:g,pos:V(p[0],0,p[2]),label:'التقطي المفتاح الذهبي '+['الأول','الثاني','الثالث'][i],active:()=>state.stage===10&&!keyItems[i].taken,onInteract:()=>{keyItems[i].taken=true;scene.remove(g);state.keys++;playInteractionSound('key');updateQuestUI();showToast('وجدتِ مفتاحاً ذهبياً! 🔑',`جمعتِ ${state.keys} من أصل ٣ مفاتيح. ${state.keys===3?'البوابة انفتحت، اذهبي إليها واضغطي تفاعل.':'المفاتيح متباعدة في الغابة؛ اتبعي الضوء الذهبي للمفتاح التالي.'}`,2800);}});
+ });
+ const gate=group(scene,[0,0,-67]);interactables.push({id:'gate',group:gate,pos:V(0,0,-67),label:'افتحي البوابة السرية',active:()=>state.stage===10,onInteract:()=>{if(state.keys<3){playInteractionSound('step');showToast('البوابة مقفلة 🔒','اجمعي المفاتيح الذهبية الثلاثة أولاً. بقي لكِ '+(3-state.keys)+' مفتاح/مفاتيح.',2600);return;}playInteractionSound('key');if(scene.userData.portal){scene.userData.portal.scale.set(1.6,1.6,1.6);scene.userData.portal.material.emissiveIntensity=3.5;}done=true;state.stage=11;updateQuestUI();showToast('انفتحت البوابة السحرية! ✨','أكملتِ المهمات العشر وجمعتِ المفاتيح كلها. انتهت رحلة نبأ بنجاح!',2300);setTimeout(()=>{$('endingScreen').style.display='flex';},1400);}});
+} 
+
+function makeButterfly(x,y,z,color,i){const g=group(scene,[x,y,z]);const wingMat=mat(color,.3,.1,{emissive:color,emissiveIntensity:.22,side:THREE.DoubleSide});const wing1=mesh(new THREE.SphereGeometry(.12,10,8),wingMat,g,[-.1,0,0],[1.25,.82,.25]);const wing2=mesh(new THREE.SphereGeometry(.12,10,8),wingMat,g,[.1,0,0],[1.25,.82,.25]);sphere(.035,M.brown,g,[0,0,-.015],[.65,1.5,.8],8);butterflies.push({group:g,w1:wing1,w2:wing2,origin:V(x,y,z),phase:i*1.7,speed:.6+Math.random()*.7});}
+function makeButterflies(){for(let i=0;i<18;i++){const colors=['#ff4b9b','#20d3d6','#ffc32b','#8c65ff','#ffea59'];makeButterfly(-18+Math.random()*36,1+Math.random()*2.8,-36+Math.random()*43,colors[i%4],i);}}
+function makeAmbientCats(){const catspec=[[-12,-1,'#f6e3ca'],[11,-7,'#bfc0ca'],[10,8,'#f1b9c5'],[-16,-24,'#e8e8ed'],[13,-31,'#deb38f']];catspec.forEach((a,i)=>{const c=createCat(a[0],a[1],a[2],.65,false);cats.push(c);c.ambient=true;c.phase=i*2.1;});}
+function makeDeer(x,z,scale=1,phase=0){
+ const g=group(scene,[x,0,z]);g.scale.setScalar(scale);const fur=mat('#895126'),light=mat('#b8894e'),hoof=mat('#2a2118'),antler=mat('#a98a4c');
+ sphere(.48,fur,g,[0,.92,0],[1.35,.9,.72],14);sphere(.25,light,g,[0,.65,-.02],[.9,.5,.7],12);cyl(.16,.22,.72,fur,g,[0,1.28,-.27],[-.38,0,0],10);sphere(.22,fur,g,[0,1.67,-.47],[.8,.9,.8],12);sphere(.14,light,g,[0,1.61,-.59],[.85,.58,.5],10);
+ for(const side of [-1,1]){sphere(.07,mat('#4f2b19'),g,[side*.19,1.72,-.45],[1,.65,.5],8);sphere(.035,M.dark,g,[side*.06,1.69,-.59],[1,1,.6],8);const ear=mesh(new THREE.ConeGeometry(.09,.32,6),fur,g,[side*.25,1.79,-.38],[0,0,side*-.7]);ear.rotation.z=side*-.9;
+ // antlers with forked branches
+ cyl(.035,.05,.34,antler,g,[side*.09,1.96,-.4],[0,0,side*-.25],7);cyl(.025,.035,.23,antler,g,[side*.14,2.12,-.4],[0,0,side*.55],7);cyl(.022,.03,.2,antler,g,[side*.04,2.15,-.4],[0,0,side*-.45],7);
+ for(const leg of [-1,1]){const lx=side*.25,lz=leg*.25;const L=cyl(.055,.075,.48,fur,g,[lx,.38,lz],[0,0,0],8);cyl(.06,.065,.1,hoof,g,[lx,.12,lz],[0,0,0],8);}
+ }
+ return {group:g,base:V(x,0,z),phase,speed:.22+Math.random()*.16,origin:V(x,0,z)};
+}
+function makeWalkingVillager(x,z,idx){
+ const g=group(scene,[x,0,z]);const cloths=[mat('#466f55'),mat('#7c5c9b'),mat('#bd7447'),mat('#3c7f8a'),mat('#a64f62')],cloth=cloths[idx%cloths.length];
+ cyl(.22,.31,.88,cloth,g,[0,.83,0],[0,0,0],10);sphere(.22,M.skin,g,[0,1.48,-.015],[.8,1,.8],12);sphere(.24,mat(idx%2?'#5a3928':'#4a3026'),g,[0,1.63,.01],[1,.55,1],10); // simple hair/head covering
+ for(const side of [-1,1]){const arm=cyl(.075,.09,.52,cloth,g,[side*.29,.91,0],[0,0,side*-.28],8);const leg=cyl(.09,.11,.42,mat('#4b4b48'),g,[side*.12,.28,0],[0,0,0],8);}
+ return {group:g,origin:V(x,0,z),phase:idx*1.7,route:idx%2?1:-1,speed:.35+idx*.035,parts:g};
+}
+function makeDeerAndWalkers(){
+ scene.userData.deer=[];scene.userData.walkers=[];
+ [[-18,-11,1.05,0],[-24,-31,.9,1],[21,-21,1.15,2],[29,5,.95,3],[42,-48,1.2,4],[-43,-60,1.1,5]].forEach(a=>scene.userData.deer.push(makeDeer(...a)));
+ [[-3,6],[4,5],[-8,5],[8,2],[-12,-13],[14,-18],[8,-32],[-16,-36],[23,-8],[-30,-42]].forEach((a,i)=>scene.userData.walkers.push(makeWalkingVillager(a[0],a[1],i)));
+}
+function makePawprints(){const footprints=[];for(let i=0;i<8;i++){const t=i/7;const x=-2-6*t,z=-8-7*t;for(const side of [-1,1]){const g=group(scene,[x+side*.22,.035,z+(i%2)*.25]);sphere(.095,mat('#ffe07a',.25,.1,{emissive:'#e7ae39',emissiveIntensity:.75}),g,[0,0,0],[.85,.45,1],8);sphere(.052,mat('#ffe07a',.25,.1,{emissive:'#e7ae39',emissiveIntensity:.75}),g,[-.08,0,-.09],[.8,.4,.8],8);sphere(.052,mat('#ffe07a',.25,.1,{emissive:'#e7ae39',emissiveIntensity:.75}),g,[0,0,-.13],[.8,.4,.8],8);sphere(.052,mat('#ffe07a',.25,.1,{emissive:'#e7ae39',emissiveIntensity:.75}),g,[.08,0,-.09],[.8,.4,.8],8);footprints.push(g);}}
+ scene.userData.paws=footprints;}
+function makeGlowMotes(){const geo=new THREE.BufferGeometry();const arr=[];for(let i=0;i<260;i++){arr.push(-32+Math.random()*64,.4+Math.random()*8,-46+Math.random()*60);}geo.setAttribute('position',new THREE.Float32BufferAttribute(arr,3));const points=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffca35',size:.12,transparent:true,opacity:.88,sizeAttenuation:true}));scene.add(points);scene.userData.motes=points;}
+function makePlayer(){player=group(scene,[0,0,8]);player.name='Nabaa';const body=group(player,[0,0,0]);playerParts.body=body;
+ // legs
+ playerParts.legL=cyl(.105,.12,.63,mat('#3b2935'),body,[-.16,.35,0],[0,0,0],10);playerParts.legR=cyl(.105,.12,.63,mat('#3b2935'),body,[.16,.35,0],[0,0,0],10);
+ // skirt layered
+ cyl(.28,.56,.85,mat('#cf326e'),body,[0,.76,0],[0,0,0],20);cyl(.27,.5,.58,mat('#8e1b4c'),body,[0,.7,-.015],[0,0,0],20);
+ // blossom overlay petals panels
+ for(let i=0;i<9;i++){const a=i*Math.PI*2/9;const panel=mesh(new THREE.PlaneGeometry(.25,.57),M.pink3,body,[Math.sin(a)*.42,.72,Math.cos(a)*.43],[0,a,0]);panel.material=panel.material.clone();panel.material.side=THREE.DoubleSide;}
+ // tunic torso
+ cyl(.29,.34,.76,M.brown2,body,[0,1.45,0],[0,0,0],16);box(.55,.2,.34,M.brown,body,[0,1.72,0]);
+ // sleeves/arms
+ playerParts.armL=cyl(.105,.13,.61,M.brown2,body,[-.39,1.44,0],[0,0,-.27],10);playerParts.armR=cyl(.105,.13,.61,M.brown2,body,[.39,1.44,0],[0,0,.27],10);sphere(.1,M.skin2,body,[-.48,1.12,-.02],[.85,1,.85],10);sphere(.1,M.skin2,body,[.48,1.12,-.02],[.85,1,.85],10);
+ // hands, boots
+ box(.24,.12,.38,M.brown,body,[-.16,.07,-.04]);box(.24,.12,.38,M.brown,body,[.16,.07,-.04]);
+ // neck, chestnut-brown hair framing a warm, friendly face
+ const hairMat=mat('#4b2618',.72),hairLight=mat('#744126',.7),browMat=mat('#3a2018',.72),eyeWhite=mat('#fff3df',.36),irisMat=mat('#533021',.42),cheekMat=mat('#db7d7a',.8);
+ cyl(.1,.12,.16,M.skin,body,[0,1.83,0]);sphere(.39,hairMat,body,[0,2.13,.04],[1.08,1.17,.9],20);sphere(.34,hairMat,body,[0,2.12,.13],[1.12,1.05,1],18);
+ // Face points toward -Z; softer cheeks, bright eyes and a friendly smile.
+ sphere(.29,M.skin2,body,[0,2.1,-.19],[.94,1.14,.66],24);
+ // A chestnut fringe and small side locks make the brown hair clearly visible.
+ sphere(.22,hairLight,body,[0,2.34,-.29],[1.05,.43,.62],18);
+ sphere(.075,hairMat,body,[-.15,2.305,-.407],[1,.72,.55],12);sphere(.075,hairMat,body,[.015,2.32,-.421],[1,.72,.55],12);sphere(.07,hairMat,body,[.16,2.30,-.402],[1,.72,.55],12);
+ sphere(.078,cheekMat,body,[-.17,2.025,-.405],[1,.58,.28],12);sphere(.078,cheekMat,body,[.17,2.025,-.405],[1,.58,.28],12);
+ // Brown side hair locks, kept behind the face rather than covering it.
+ sphere(.12,hairMat,body,[-.27,2.12,-.15],[.68,1.35,.82],16);sphere(.12,hairMat,body,[.27,2.12,-.15],[.68,1.35,.82],16);
+ for(const side of [-1,1]){
+   sphere(.061,eyeWhite,body,[side*.105,2.155,-.391],[1.02,1.12,.55],14);
+   sphere(.034,irisMat,body,[side*.105,2.154,-.423],[1,1.1,.52],12);
+   sphere(.018,M.dark,body,[side*.105,2.153,-.439],[.9,1.1,.5],10);
+   sphere(.009,eyeWhite,body,[side*.092,2.169,-.449],[1,1,.55],8);
+   lineBetween(body,[side*.055,2.238,-.398],[side*.16,2.25,-.391],.018,browMat,8);
+ }
+ sphere(.027,mat('#bd7865'),body,[0,2.075,-.424],[.78,.8,.55],10);
+ const smileCurve=new THREE.QuadraticBezierCurve3(V(-.067,1.993,-.416),V(0,1.966,-.444),V(.067,1.993,-.416));mesh(new THREE.TubeGeometry(smileCurve,12,.012,6,false),mat('#8e3d47'),body,[0,0,0]);
+ // Matching brown scarf drape and a small satchel at the back.
+ const scarf=cyl(.12,.16,.68,hairMat,body,[0,1.62,.32],[.13,0,.03]);box(.29,.35,.14,M.brown,body,[.28,1.1,.22],[0,0,.08]);lineBetween(body,[-.25,1.74,-.05],[.27,1.15,.18],.035,M.gold);sphere(.07,M.pink3,body,[.3,.96,.2],[1,1,1],8);
+ playerParts.body=body;player.position.set(0,0,8);scene.add(player);
+}
+function setupTouch(){
+ const base=$('stickBase'),knob=$('stick');base.addEventListener('pointerdown',e=>{e.preventDefault();stick.active=true;stick.id=e.pointerId;base.setPointerCapture(e.pointerId);moveStick(e);});base.addEventListener('pointermove',e=>{if(stick.active&&e.pointerId===stick.id){e.preventDefault();moveStick(e);}});const end=e=>{if(e.pointerId===stick.id){stick.active=false;stick.id=null;stick.x=0;stick.y=0;knob.style.transform='translate(0px,0px)';}};base.addEventListener('pointerup',end);base.addEventListener('pointercancel',end);
+ function moveStick(e){const r=base.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let x=e.clientX-cx,y=e.clientY-cy,max=42;const d=Math.hypot(x,y);if(d>max){x=x/d*max;y=y/d*max;}stick.x=x/max;stick.y=y/max;knob.style.transform=`translate(${x}px,${y}px)`;}
+}
+let canvasDrag=null;function onCanvasPointerDown(e){if(e.pointerType==='mouse'||e.pointerType==='touch'||e.pointerType==='pen'){canvasDrag={x:e.clientX,y:e.clientY,id:e.pointerId};try{renderer.domElement.setPointerCapture(e.pointerId);}catch(_){} }}function onCanvasPointerMove(e){if(canvasDrag&&canvasDrag.id===e.pointerId){const dx=e.clientX-canvasDrag.x;if(Math.abs(dx)>1)camYaw-=dx*.006;canvasDrag={x:e.clientX,y:e.clientY,id:e.pointerId};}}function onCanvasPointerUp(){canvasDrag=null;}
+function resize(){if(!renderer)return;camera.aspect=innerWidth/innerHeight;camera.fov=innerWidth<500?62:56;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.setSize(innerWidth,innerHeight);}
+function currentObjective(){switch(state.stage){case 0:return ['أعيدي سنفور إلى بيته','المهمة ١: تحدثي مع الجدة نون قرب البيوت لتعرفي آخر مكان شوهد فيه سنفور.'];case 1:return ['أعيدي سنفور إلى بيته','المهمة ٢: افحصي شريط الساكورا الممزق قرب الشجيرة.'];case 2:return ['أعيدي سنفور إلى بيته','المهمة ٣: اتبعي آثار الأقدام إلى جذع الشجرة المضيء.'];case 3:return ['أعيدي سنفور إلى بيته','المهمة ٤: اعثري على سنفور في فسحة الغابة. اتبعي الضوء الذهبي.'];case 4:return ['أعيدي سنفور إلى بيته','المهمة ٥: اقتربي من سنفور مرة ثانية وطمئنيه.'];case 5:return ['أعيدي سنفور إلى بيته','المهمة ٦: اجمعي الوجبات الثلاث المضيئة لسنفور ('+state.petals+'/3).'];case 6:return ['أعيدي سنفور إلى بيته','المهمة ٧: ارجعي إلى سنفور واحمليه برفق.'];case 7:return ['أعيدي سنفور إلى بيته','المهمة ٨: اتبعي الضوء الذهبي إلى جسر الحجارة وتحققي من الطريق.'];case 8:return ['أعيدي سنفور إلى بيته','المهمة ٩: حلّي لغز الأنوار لفتح الطريق الآمن إلى القرية.'];case 9:return ['أعيدي سنفور إلى بيته','المهمة ١٠: اتبعي الضوء حتى الجدة نون وأعيدي سنفور إلى بيته.'];case 10:return ['المهمة الإضافية: مفاتيح البوابة','أحسنتِ! رجع سنفور للجدة. اجمعي ٣ مفاتيح ذهبية ('+state.keys+'/3)، ثم اتجهي إلى البوابة واضغطي «تفاعل» لإنهاء اللعبة.'];default:return ['انتهت مغامرة نبأ','فتحتِ البوابة السرية وأعدتِ سنفور إلى بيته.'];}}
+function updateQuestUI(){const q=currentObjective();$('qTitle').textContent=q[0];$('qDesc').textContent=q[1];$('qStep').textContent=done?'اكتملت الرحلة':state.stage===10?'مهمة إضافية بعد ١٠ من ١٠':'المهمة '+['١','٢','٣','٤','٥','٦','٧','٨','٩','١٠'][Math.min(9,state.stage)]+' من ١٠';$('progressBar').style.width=(done?100:Math.min(100,state.stage/9*100))+'%';$('counterIcon').textContent=state.stage===10||done?'🔑':'🐟';$('petalCount').textContent=state.stage===10||done?state.keys+'/3':state.petals+'/3';}
+
+function showToast(title,msg,dur=3300){const t=$('toast');t.querySelector('b').textContent=title;t.querySelector('span').textContent=msg;t.classList.add('show');toastTimer=performance.now()+dur;}
+function distXZ(a,b){return Math.hypot(a.x-b.x,a.z-b.z);}
+function findNearby(){let best=null,bestD=4.4;for(const it of interactables){if(!it.active())continue;const d=distXZ(player.position,it.pos);if(d<bestD){bestD=d;best=it;}}
+ if(!best){for(const c of cats){if(!c.ambient||!c.group.parent)continue;const d=distXZ(player.position,c.group.position);if(d<2.8&&d<bestD){bestD=d;best={id:'petcat',pos:c.group.position,label:'داعبي القطة واسمعي مياوها',active:()=>true,onInteract:()=>{playCatMeow();showToast('مياااو! 🐈','القطة جاوبت نبأ بصوت مياو.');}};}}
+ const walkers=scene.userData.walkers||[];if(!best)for(const w of walkers){const d=distXZ(player.position,w.group.position);if(d<2.15&&d<bestD){bestD=d;best={id:'walker',pos:w.group.position,label:'حيّي أحد أهل القرية',active:()=>true,onInteract:()=>{playInteractionSound('hello');showToast('أهل القرية','ابتسمت لكِ إحدى الشخصيات ولوّحت بيدها.');}};}}
+ const deer=scene.userData.deer||[];if(!best)for(const d0 of deer){const d=distXZ(player.position,d0.group.position);if(d<2.3&&d<bestD){bestD=d;best={id:'deer',pos:d0.group.position,label:'اقتربي بهدوء من الغزال',active:()=>true,onInteract:()=>{playInteractionSound('step');showToast('الغزال يحييكِ','رفع الغزال رأسه ثم أكمل سيره بين الأشجار.');}};}}
+ if(!best)for(const b of butterflies){const d=distXZ(player.position,b.group.position);if(d<1.7&&d<bestD){bestD=d;best={id:'butterfly',pos:b.group.position,label:'تفاعلي مع الفراشة اللامعة',active:()=>true,onInteract:()=>{playInteractionSound('sparkle');showToast('فراشة مضيئة','رفرفت الفراشة حولكِ ثم طارت باتجاه الضوء.');}};}}
+ }
+ return best;}
+
+function doInteract(){if(!started||done)return;if($('puzzleModal').style.display==='flex')return;nearby=findNearby();if(nearby){if(!['mochi','petcat','walker','deer','butterfly','key0','key1','key2','gate'].includes(nearby.id))playInteractionSound('sparkle');nearby.onInteract();$('interactHint').classList.remove('show');}else{showToast('واصلي الاستكشاف','اقتربي من الدليل المضيء أو القطة أو إحدى الشخصيات.',1800);}}
+function updateMovement(dt,t){if(!started||done)return;let right=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);let forward=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);if(stick.active){right=stick.x;forward=-stick.y;}if(keys.shift)running=true;else if(!stick.active)running=false;const len=Math.hypot(right,forward);let dx=0,dz=0;let speed=running?6.4:3.7;
+ if(len>.12){if(started&&performance.now()>nextStepSoundAt){playFootstep();nextStepSoundAt=performance.now()+(running?245:370);}right/=Math.max(1,len);forward/=Math.max(1,len);dx=(right*Math.cos(camYaw)-forward*Math.sin(camYaw))*speed*dt;dz=(-right*Math.sin(camYaw)-forward*Math.cos(camYaw))*speed*dt;const nx=player.position.x+dx,nz=player.position.z+dz;let collision=false;for(const tr of trees){if(Math.hypot(nx-tr.x,nz-tr.z)<tr.r+.42){collision=true;break;}}if(!collision){player.position.x=nx;player.position.z=nz;}const moveAngle=Math.atan2(-dx,-dz);player.rotation.y=moveAngle;walkPhase+=dt*(running?15.5:9.2);const stride=Math.sin(walkPhase),counter=Math.cos(walkPhase);playerParts.legL.rotation.x=stride*(running?.78:.52);playerParts.legR.rotation.x=-stride*(running?.78:.52);playerParts.armL.rotation.x=-stride*(running?.48:.32);playerParts.armR.rotation.x=stride*(running?.48:.32);playerParts.armL.rotation.z=-.27+counter*.045;playerParts.armR.rotation.z=.27-counter*.045;playerParts.body.position.y=Math.abs(stride)*(running?.075:.035);playerParts.body.rotation.z=Math.sin(walkPhase*.5)*(running?.055:.035);playerParts.body.rotation.x=running?-.045:0;playerParts.body.rotation.y=Math.sin(walkPhase*.5)*.025;}else{playerParts.legL.rotation.x*=.72;playerParts.legR.rotation.x*=.72;playerParts.armL.rotation.x*=.72;playerParts.armR.rotation.x*=.72;playerParts.armL.rotation.z+=( -.27-playerParts.armL.rotation.z)*Math.min(1,dt*5);playerParts.armR.rotation.z+=( .27-playerParts.armR.rotation.z)*Math.min(1,dt*5);playerParts.body.position.y=Math.sin(t*1.4)*.012;playerParts.body.rotation.z+=(0-playerParts.body.rotation.z)*Math.min(1,dt*4);playerParts.body.rotation.x+=(0-playerParts.body.rotation.x)*Math.min(1,dt*4);playerParts.body.rotation.y+=(0-playerParts.body.rotation.y)*Math.min(1,dt*4);}
+ // jump arc
+ player.userData.vy=player.userData.vy||0;player.userData.jumpY=player.userData.jumpY||0;if(jumpQueued&&player.userData.jumpY<.02){player.userData.vy=5.6;jumpQueued=false;}if(player.userData.jumpY>0||player.userData.vy>0){player.userData.vy-=13*dt;player.userData.jumpY=Math.max(0,player.userData.jumpY+player.userData.vy*dt);if(player.userData.jumpY===0)player.userData.vy=0;}else jumpQueued=false;player.position.y=player.userData.jumpY;
+ // smooth follow camera: user drag adjusts orbit angle, not movement controls
+ const targetYaw=player.rotation.y;const camDist=6.4;const offset=camYaw;const desired=V(player.position.x+Math.sin(offset)*camDist,player.position.y+3.2,player.position.z+Math.cos(offset)*camDist);camera.position.lerp(desired,1-Math.exp(-5.5*dt));camera.lookAt(player.position.x,player.position.y+1.15,player.position.z-0.45);
+}
+function updateWorld(t,dt){
+ // Animate the forest atmosphere and gentle character breathing.
+ if(playerParts.body&&!keys.w&&!keys.a&&!keys.s&&!keys.d&&!stick.active){playerParts.body.scale.y=1+Math.sin(t*1.8)*.006;}else if(playerParts.body){playerParts.body.scale.y=1;}
+ trees.forEach((tr,i)=>{});updateNavigationMarkers(t);butterflies.forEach(b=>{b.group.position.x=b.origin.x+Math.sin(t*b.speed+b.phase)*.7;b.group.position.y=b.origin.y+Math.sin(t*2+b.phase)*.32;b.group.position.z=b.origin.z+Math.cos(t*.65+b.phase)*.55;const flap=Math.sin(t*15+b.phase)*.7;b.w1.rotation.z=flap;b.w2.rotation.z=-flap;});cats.forEach(c=>{if(c.ambient){c.group.position.y=.03+Math.abs(Math.sin(t*2+c.phase))*.025;c.group.rotation.y=Math.sin(t*.4+c.phase)*.16;}});
+ if(scene.userData.deer)scene.userData.deer.forEach(d=>{const a=t*d.speed+d.phase;d.group.position.x=d.origin.x+Math.sin(a)*2.8;d.group.position.z=d.origin.z+Math.cos(a*.7)*2.2;d.group.rotation.y=Math.atan2(Math.cos(a)*d.speed*2.8,-Math.sin(a*.7)*d.speed*1.5);});
+ if(scene.userData.walkers)scene.userData.walkers.forEach((w,i)=>{const a=t*w.speed+w.phase;w.group.position.x=w.origin.x+Math.sin(a)*2.2;w.group.position.z=w.origin.z+Math.cos(a*.65)*1.6;w.group.rotation.y=Math.atan2(Math.cos(a)*w.speed*2.2,-Math.sin(a*.65)*w.speed);w.group.children.forEach((part,j)=>{if(part.geometry&&part.geometry.type==='CylinderGeometry'&&j>3)part.rotation.x=Math.sin(a*3+j)*.22;});});
+ if(scene.userData.portal){scene.userData.portal.rotation.z=Math.sin(t*.6)*.08;scene.userData.portal.material.emissiveIntensity=.4+Math.sin(t*2)*.18;}keyItems.forEach((k,i)=>{if(k.group.parent){k.group.visible=state.stage===10&&!k.taken;k.group.position.y=.12+Math.sin(t*2.5+i)*.14;k.group.rotation.y=Math.sin(t*.8+i)*.16;k.halo.rotation.z=t*.8;k.light.intensity=1.3+Math.sin(t*3+i)*.5;}})
+ if(scene.userData.paws){scene.userData.paws.forEach((p,i)=>{p.visible=state.stage===1; p.children.forEach(ch=>{if(ch.material===M.gold){ch.material=M.gold;}});});}
+ interactables.forEach(it=>{if(it.id.startsWith('petal')&&!it.group.parent)return;if(it.id==='ribbon')it.group.rotation.y=Math.sin(t*1.6)*.06;if(it.id==='elder')it.group.rotation.y=Math.sin(t*.55)*.08;if(it.id==='log'&&it.group.children[2]){it.group.children[2].rotation.y=t*1.1;it.group.children[2].position.y=.8+Math.sin(t*2.7)*.1;}if(it.id.startsWith('petal')&&it.group.parent){it.group.position.y=.2+Math.sin(t*2.4+Number(it.id.slice(5)))*.09;}});
+}
+function updatePrompt(){if(!started)return;nearby=findNearby();if(nearby){$('interactHint').classList.add('show');$('interactHint').textContent='✦ تفاعل · '+nearby.label;$('targetText').classList.add('show');$('targetText').textContent='✦ '+nearby.label;}else{$('interactHint').classList.remove('show');$('targetText').classList.remove('show');}}
+function pickPuzzle(sym){if($('puzzleModal').style.display!=='flex')return;playInteractionSound('sparkle');const correct=['blossom','butterfly','leaf'];puzzleSequence.push(sym);updatePuzzleUI();if(puzzleSequence.length===3){if(puzzleSequence.every((s,i)=>s===correct[i])){state.puzzleSolved=true;state.stage=9;$('puzzleFeedback').textContent='انكشف الطريق الذهبي إلى القرية!';updateQuestUI();setTimeout(()=>{$('puzzleModal').style.display='none';showToast('المهمة ٩ اكتملت','ظهر الضوء الذهبي باتجاه القرية. أعيدي سنفور إلى الجدة نون.');},800);}else{$('puzzleFeedback').textContent='الترتيب غير صحيح. راجعي النقوش وحاولي مجدداً.';setTimeout(()=>{puzzleSequence=[];updatePuzzleUI();},1200);}}}
+function updatePuzzleUI(){const sym={blossom:'🌸',butterfly:'🦋',leaf:'🍃'};$('sequence').textContent=puzzleSequence.length?puzzleSequence.map(s=>sym[s]).join('  '):'_  _  _';}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035),t=clock.elapsedTime;updateMovement(dt,t);updateWorld(t,dt);if(started){updatePrompt();if(performance.now()>toastTimer)$('toast').classList.remove('show');}renderer.render(scene,camera);}
+// make all areas, but expose clear loading feedback when CDN loads slowly
+try{createScene();}catch(err){console.error(err);$('loadtext').textContent='حدث خطأ أثناء إنشاء العالم. أعيدي تحميل الصفحة للمحاولة.';}
+})();
+</script>
+</body>
+</html>
